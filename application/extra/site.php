@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => '我的网站',
+    'name' => '轨道交通',
     'beian' => '',
     'cdnurl' => '',
     'version' => '1.0.1',
