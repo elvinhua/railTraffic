@@ -1,21 +1,54 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 本地
+ Source Server         : 70测试机
  Source Server Type    : MySQL
- Source Server Version : 50724
- Source Host           : localhost:3306
+ Source Server Version : 50514
+ Source Host           : 172.16.37.139:3306
  Source Schema         : railtraffic
 
  Target Server Type    : MySQL
- Target Server Version : 50724
+ Target Server Version : 50514
  File Encoding         : 65001
 
- Date: 23/11/2020 11:47:42
+ Date: 09/12/2020 18:05:35
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for del_rail_course
+-- ----------------------------
+DROP TABLE IF EXISTS `del_rail_course`;
+CREATE TABLE `del_rail_course`  (
+  `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '序号ID',
+  `title` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '课程名称',
+  `type` enum('questions','doc','video') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '课程类型：querstions:试题、doc:文档、video:视频',
+  `starTime` datetime NULL DEFAULT NULL COMMENT '开始时间',
+  `endTime` datetime NULL DEFAULT NULL COMMENT '结束时间',
+  `valid` tinyint(1) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '课程有效性（规则： 默认0 为0时starTime和endTime必有值，非0时则不取startTime和endTime）',
+  `creator` smallint(5) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '创建者ID',
+  `department` smallint(5) NULL DEFAULT NULL COMMENT '创建者所属部门（ID）',
+  `examStatus` tinyint(1) NULL DEFAULT NULL COMMENT '考试状态 1:未发布；2:已发布；',
+  `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updatetime` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '轨道交通-在线课程表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for del_rail_course_subtabulation
+-- ----------------------------
+DROP TABLE IF EXISTS `del_rail_course_subtabulation`;
+CREATE TABLE `del_rail_course_subtabulation`  (
+  `sid` int(10) UNSIGNED NOT NULL COMMENT '主表ID',
+  `topicMode` enum('rand','fixed') CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '组题方式  rand：随机组题；fixed：固定组题',
+  `category` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '试题分类 以id+逗号相隔',
+  `questionRule` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '试题规则 s_10：不限_10道题；x_o_1_0_3_4，x_d_2_1_1_4，x_f_3_2_1_6；x为非不限类型；o,d,f分别为单选、多选、填空；后面四为分别为简单、普通、困难、选题总数 ',
+  `questions` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT '规则下生成的所有题ID 逗号隔开',
+  `notopic` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '非试题链接（文档、视频）',
+  PRIMARY KEY (`sid`) USING BTREE
+) ENGINE = MyISAM CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-在线课程副表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for rail_admin
@@ -38,12 +71,12 @@ CREATE TABLE `rail_admin`  (
   `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal' COMMENT '状态',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '管理员表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '管理员表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_admin
 -- ----------------------------
-INSERT INTO `rail_admin` VALUES (1, 'admin', 'Admin', '5fccdbe068dda83dda5a443c08740477', 'afd235', '/assets/img/avatar.png', 'admin@admin.com', 0, 1606103217, '127.0.0.1', 1492186163, 1606103217, '60e12fbf-fc95-47c7-afe0-4876d9aa2166', 'normal');
+INSERT INTO `rail_admin` VALUES (1, 'admin', 'Admin', '5fccdbe068dda83dda5a443c08740477', 'afd235', '/assets/img/avatar.png', 'admin@admin.com', 0, 1607400602, '172.16.13.137', 1492186163, 1607400602, '1e1a3176-ffc9-435f-afd0-acb709221302', 'normal');
 
 -- ----------------------------
 -- Table structure for rail_admin_log
@@ -61,7 +94,7 @@ CREATE TABLE `rail_admin_log`  (
   `createtime` int(10) NULL DEFAULT NULL COMMENT '操作时间',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `name`(`username`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '管理员日志表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '管理员日志表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_admin_log
@@ -73,6 +106,17 @@ INSERT INTO `rail_admin_log` VALUES (4, 0, 'Unknown', '/FsAtovacUR.php/index/log
 INSERT INTO `rail_admin_log` VALUES (5, 0, 'Unknown', '/FsAtovacUR.php/index/login', '', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"h8q8\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36', 1606103207);
 INSERT INTO `rail_admin_log` VALUES (6, 0, 'Unknown', '/FsAtovacUR.php/index/login', '', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"fsk0\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36', 1606103213);
 INSERT INTO `rail_admin_log` VALUES (7, 1, 'admin', '/FsAtovacUR.php/index/login', '登录', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"f2y5\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36', 1606103217);
+INSERT INTO `rail_admin_log` VALUES (8, 1, 'admin', '/FsAtovacUR.php/index/login', '登录', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"dz2g\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1606267749);
+INSERT INTO `rail_admin_log` VALUES (9, 1, 'admin', '/FsAtovacUR.php/index/login', '登录', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"zpgh\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1606702658);
+INSERT INTO `rail_admin_log` VALUES (10, 0, 'Unknown', '/FsAtovacUR.php/index/login', '', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"ghqf\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1606975202);
+INSERT INTO `rail_admin_log` VALUES (11, 1, 'admin', '/FsAtovacUR.php/index/login', '登录', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"tnay\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1606975205);
+INSERT INTO `rail_admin_log` VALUES (12, 1, 'admin', '/FsAtovacUR.php/index/login', '登录', '{\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"vtpy\"}', '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1607048473);
+INSERT INTO `rail_admin_log` VALUES (13, 1, 'admin', '/FsAtovacUR.php/index/login?url=%2FFsAtovacUR.php', '登录', '{\"url\":\"\\/FsAtovacUR.php\",\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"htun\"}', '172.16.13.150', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1607400208);
+INSERT INTO `rail_admin_log` VALUES (14, 1, 'admin', '/FsAtovacUR.php/user/user/edit/ids/1?dialog=1', '会员管理 / 会员管理 / 编辑', '{\"dialog\":\"1\",\"__token__\":\"***\",\"row\":{\"id\":\"1\",\"group_id\":\"1\",\"username\":\"admin\",\"nickname\":\"admin\",\"password\":\"***\",\"email\":\"admin@163.com\",\"mobile\":\"13888888888\",\"avatar\":\"\",\"level\":\"0\",\"gender\":\"0\",\"birthday\":\"2017-04-15\",\"bio\":\"\",\"money\":\"0.00\",\"score\":\"0\",\"successions\":\"1\",\"maxsuccessions\":\"1\",\"prevtime\":\"2018-01-17 14:28:12\",\"logintime\":\"2018-01-17 14:46:54\",\"loginip\":\"127.0.0.1\",\"loginfailure\":\"0\",\"joinip\":\"127.0.0.1\",\"jointime\":\"2017-04-06 14:50:18\",\"status\":\"normal\"},\"ids\":\"1\"}', '172.16.13.150', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1607400287);
+INSERT INTO `rail_admin_log` VALUES (15, 1, 'admin', '/FsAtovacUR.php/user/user/edit/ids/1?dialog=1', '会员管理 / 会员管理 / 编辑', '{\"dialog\":\"1\",\"__token__\":\"***\",\"row\":{\"id\":\"1\",\"group_id\":\"1\",\"username\":\"admin\",\"nickname\":\"admin\",\"password\":\"***\",\"email\":\"admin@163.com\",\"mobile\":\"13888888888\",\"avatar\":\"\",\"level\":\"0\",\"gender\":\"0\",\"birthday\":\"2017-04-15\",\"bio\":\"\",\"money\":\"0.00\",\"score\":\"0\",\"successions\":\"1\",\"maxsuccessions\":\"1\",\"prevtime\":\"2018-01-17 14:28:12\",\"logintime\":\"2018-01-17 14:46:54\",\"loginip\":\"127.0.0.1\",\"loginfailure\":\"0\",\"joinip\":\"127.0.0.1\",\"jointime\":\"2017-04-06 14:50:18\",\"status\":\"normal\"},\"ids\":\"1\"}', '172.16.13.150', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1607400304);
+INSERT INTO `rail_admin_log` VALUES (16, 1, 'admin', '/FsAtovacUR.php/user/user/edit/ids/1?dialog=1', '会员管理 / 会员管理 / 编辑', '{\"dialog\":\"1\",\"__token__\":\"***\",\"row\":{\"id\":\"1\",\"group_id\":\"1\",\"username\":\"admin\",\"nickname\":\"admin\",\"password\":\"***\",\"email\":\"admin@163.com\",\"mobile\":\"13888888888\",\"avatar\":\"\",\"level\":\"0\",\"gender\":\"0\",\"birthday\":\"2017-04-15\",\"bio\":\"\",\"money\":\"0.00\",\"score\":\"0\",\"successions\":\"1\",\"maxsuccessions\":\"1\",\"prevtime\":\"2018-01-17 14:28:12\",\"logintime\":\"2018-01-17 14:46:54\",\"loginip\":\"127.0.0.1\",\"loginfailure\":\"0\",\"joinip\":\"127.0.0.1\",\"jointime\":\"2017-04-06 14:50:18\",\"status\":\"normal\"},\"ids\":\"1\"}', '172.16.13.150', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1607400310);
+INSERT INTO `rail_admin_log` VALUES (17, 1, 'admin', '/FsAtovacUR.php/index/login?url=%2FFsAtovacUR.php', '登录', '{\"url\":\"\\/FsAtovacUR.php\",\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"wpf8\"}', '172.16.13.150', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36', 1607400442);
+INSERT INTO `rail_admin_log` VALUES (18, 1, 'admin', '/FsAtovacUR.php/index/login?url=%2FFsAtovacUR.php', '登录', '{\"url\":\"\\/FsAtovacUR.php\",\"__token__\":\"***\",\"username\":\"admin\",\"password\":\"***\",\"captcha\":\"hdne\"}', '172.16.13.137', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36', 1607400602);
 
 -- ----------------------------
 -- Table structure for rail_area
@@ -93,7 +137,7 @@ CREATE TABLE `rail_area`  (
   `lat` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '纬度',
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `pid`(`pid`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '地区表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '地区表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for rail_attachment
@@ -118,7 +162,7 @@ CREATE TABLE `rail_attachment`  (
   `storage` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'local' COMMENT '存储位置',
   `sha1` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '文件 sha1编码',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '附件表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '附件表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_attachment
@@ -139,7 +183,7 @@ CREATE TABLE `rail_auth_group`  (
   `updatetime` int(10) NULL DEFAULT NULL COMMENT '更新时间',
   `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '状态',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分组表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分组表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_auth_group
@@ -160,7 +204,7 @@ CREATE TABLE `rail_auth_group_access`  (
   UNIQUE INDEX `uid_group_id`(`uid`, `group_id`) USING BTREE,
   INDEX `uid`(`uid`) USING BTREE,
   INDEX `group_id`(`group_id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限分组表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '权限分组表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_auth_group_access
@@ -189,7 +233,7 @@ CREATE TABLE `rail_auth_rule`  (
   UNIQUE INDEX `name`(`name`) USING BTREE,
   INDEX `pid`(`pid`) USING BTREE,
   INDEX `weigh`(`weigh`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 85 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '节点表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 85 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '节点表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_auth_rule
@@ -299,7 +343,7 @@ CREATE TABLE `rail_category`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `weigh`(`weigh`, `id`) USING BTREE,
   INDEX `pid`(`pid`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '分类表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_category
@@ -336,7 +380,7 @@ CREATE TABLE `rail_config`  (
   `setting` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '配置',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '系统配置' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_config
@@ -372,7 +416,173 @@ CREATE TABLE `rail_ems`  (
   `ip` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT 'IP',
   `createtime` int(10) NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '邮箱验证码表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '邮箱验证码表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for rail_exam
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_exam`;
+CREATE TABLE `rail_exam`  (
+  `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '序号ID',
+  `title` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '标题名称',
+  `type` tinyint(2) NOT NULL DEFAULT 1 COMMENT '试题类型1：考试问答；2：考试在线考试；3：课程在线学习',
+  `category` tinyint(4) NOT NULL DEFAULT 1 COMMENT '分类：(考试问答1每日答题2专项答题3挑战答题)(课程在线学习1试题 2文档3视频)(考试在线考试1在线考试)',
+  `exam_time_all` int(6) UNSIGNED NOT NULL DEFAULT 0 COMMENT '总答题时长，单位秒，0为不限制',
+  `exam_time_once` int(6) NOT NULL DEFAULT 0 COMMENT '单题时长，单位秒，0为不限制',
+  `exam_limit` int(6) UNSIGNED NOT NULL DEFAULT 0 COMMENT '答券次数，0为不限次',
+  `start_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `is_valid` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT '有效性，1为永久有效，0为开始结束区间',
+  `is_menber_all` tinyint(2) NOT NULL DEFAULT 1 COMMENT '是否所有人有权限答题，非所有人时需指定member表部门或人员 1：是；0：否；',
+  `is_category_easy_setting` tinyint(2) NOT NULL DEFAULT 0 COMMENT '是否指定试题分类及难易，如为指定即为随机组题，需指定category及easy表试题分类及难易度1：指定分类及难易；0：不指定即固定组题；',
+  `is_easy_setting` tinyint(2) NOT NULL DEFAULT 0 COMMENT '是否指定难易程度，指定时需设置easy表，详细配置难易度和多选单选题型 0：不指定难易并指定easy_setting_num；1：指定；',
+  `easy_setting_num` int(6) NOT NULL DEFAULT 0 COMMENT '不指定难易程度时试题的数量，是否指定及指定的数量使用两个字段逻辑拆分',
+  `creator_id` smallint(5) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '创建者ID',
+  `exam_status` tinyint(1) NULL DEFAULT NULL COMMENT '考试状态 1:未发布；2:已发布；3:考试中；4:考试结束；永久有效的答题或考试 发布只有“考试中”状态',
+  `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updatetime` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '轨道交通-试题主表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for rail_exam_analyse
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_exam_analyse`;
+CREATE TABLE `rail_exam_analyse`  (
+  `id` int(8) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '序号ID',
+  `exam_id` int(8) NULL DEFAULT NULL COMMENT '关联ID（答题、课程、考试）',
+  `user_id` int(5) UNSIGNED NULL DEFAULT NULL COMMENT '用户ID',
+  `module_type` enum('answer','course','exam') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '模块类型（答题、课程、考试）',
+  `category` enum('daily','specialty','challenge','online','course') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '分类：daily:每日答题、specialty:专项答题、challenge:挑战答题、online:在线考试、course:在线课程',
+  `title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '题目',
+  `answer_num` int(5) NULL DEFAULT NULL COMMENT '答题次数/学习次数',
+  `bonus_points` int(10) NULL DEFAULT NULL COMMENT '奖励积分',
+  `total_score` int(10) NULL DEFAULT NULL COMMENT '成绩分数',
+  `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updatetime` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `an`(`answer_num`) USING BTREE COMMENT '答题次数排序',
+  INDEX `bp`(`bonus_points`) USING BTREE COMMENT '积分排序',
+  INDEX `mt`(`module_type`) USING BTREE COMMENT '模块类型筛选',
+  INDEX `cg`(`category`) USING BTREE COMMENT '选择分类筛选'
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '轨道交通-用户答题分析表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of rail_exam_analyse
+-- ----------------------------
+INSERT INTO `rail_exam_analyse` VALUES (1, NULL, NULL, NULL, 'daily', NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- ----------------------------
+-- Table structure for rail_exam_easy
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_exam_easy`;
+CREATE TABLE `rail_exam_easy`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_id` int(11) NOT NULL,
+  `style_type` tinyint(2) NOT NULL DEFAULT 1 COMMENT '题型类型1：单选；2：多选；3：填空；',
+  `easy_type` tinyint(2) NOT NULL DEFAULT 1 COMMENT '难易程度1：简单；2：普通；3：困难；',
+  `score` int(3) NOT NULL COMMENT '每题分数',
+  `num` int(6) NOT NULL COMMENT '指定难易程度的试题数量',
+  `create_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '轨道交通-试题指定难易程度表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for rail_exam_group
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_exam_group`;
+CREATE TABLE `rail_exam_group`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_id` int(11) NOT NULL,
+  `type` tinyint(2) NOT NULL DEFAULT 1 COMMENT '是否为全部分类，非全部时，代表详细指定了某个分类的试题1：是；0：否；',
+  `group_id` int(11) NOT NULL,
+  `category_name` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `create_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '轨道交通-试题指定分类表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for rail_exam_logs
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_exam_logs`;
+CREATE TABLE `rail_exam_logs`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `total_score` int(3) NOT NULL COMMENT '答题总得分',
+  `createtime` datetime NOT NULL,
+  `updatetime` datetime NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '轨道交通-试题答题记录表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for rail_exam_member
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_exam_member`;
+CREATE TABLE `rail_exam_member`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `exam_id` int(11) NOT NULL COMMENT '考试id',
+  `type` tinyint(2) NOT NULL DEFAULT 1 COMMENT '权限类型，指定谁有权限答题 0：所有人；1：指定部门；2：指定人员',
+  `department_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '部门id',
+  `user_id` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '用户id',
+  `create_time` datetime NOT NULL,
+  `update_time` datetime NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `exam_id_index`(`exam_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '轨道交通-试题权限表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Table structure for rail_item_category
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_item_category`;
+CREATE TABLE `rail_item_category`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '分类ID',
+  `pid` int(11) UNSIGNED ZEROFILL NOT NULL COMMENT '父级ID（多级分类扩展，如没用就忽略）',
+  `category_name` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '分类名称',
+  `createtime` datetime NULL DEFAULT NULL COMMENT '创建分类时间',
+  `updatetime` datetime NULL DEFAULT NULL COMMENT '更新分类时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-分类管理' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for rail_item_list
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_item_list`;
+CREATE TABLE `rail_item_list`  (
+  `id` int(8) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '序号',
+  `category_id` int(11) UNSIGNED NOT NULL DEFAULT 0 COMMENT '试题分类ID',
+  `topic` varchar(150) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '题目',
+  `type` tinyint(1) NOT NULL DEFAULT 1 COMMENT '试题类型：1.单选；2.多选；3.填空',
+  `easy` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT '难度系数：1.简单；2.普通；3.困难',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '试题主体（json结构存储）',
+  `answer_parsing` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '答案解析',
+  `status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '审核状态：1.待提交 2.待审核 3.审核通过 4.待修改',
+  `creator_id` smallint(5) UNSIGNED ZEROFILL NOT NULL COMMENT '创建人ID',
+  `reviewtime` datetime NULL DEFAULT NULL COMMENT '审核时间',
+  `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updatetime` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `s`(`status`) USING BTREE COMMENT '状态查询',
+  INDEX `t`(`type`) USING BTREE COMMENT '题型类型查询',
+  INDEX `l`(`easy`) USING BTREE COMMENT '题型难度查询',
+  INDEX `c`(`category_id`) USING BTREE COMMENT '试题分类查询',
+  INDEX `time`(`createtime`) USING BTREE COMMENT '创建时间索引'
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '轨道交通-试题库' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of rail_item_list
+-- ----------------------------
+INSERT INTO `rail_item_list` VALUES (1, 0, '', 1, 1, '', '', 2, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (2, 0, '', 1, 1, '', '', 2, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (3, 0, '', 1, 1, '', '', 2, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (4, 0, '', 1, 1, '', '', 2, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (5, 0, '', 1, 1, '', '', 0, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (6, 0, '', 1, 1, '', '', 1, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (7, 0, '', 1, 1, '', '', 1, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (8, 0, '', 1, 1, '', '', 2, 00000, NULL, NULL, NULL);
+INSERT INTO `rail_item_list` VALUES (9, 0, '', 1, 1, '', '', 0, 00000, NULL, NULL, NULL);
 
 -- ----------------------------
 -- Table structure for rail_sms
@@ -387,7 +597,7 @@ CREATE TABLE `rail_sms`  (
   `ip` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT 'IP',
   `createtime` int(10) UNSIGNED NULL DEFAULT 0 COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '短信验证码表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '短信验证码表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for rail_test
@@ -414,9 +624,9 @@ CREATE TABLE `rail_test`  (
   `price` float(10, 2) UNSIGNED NOT NULL DEFAULT 0.00 COMMENT '价格',
   `views` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '点击',
   `startdate` date NULL DEFAULT NULL COMMENT '开始日期',
-  `activitytime` datetime(0) NULL DEFAULT NULL COMMENT '活动时间(datetime)',
-  `year` year NULL DEFAULT NULL COMMENT '年',
-  `times` time(0) NULL DEFAULT NULL COMMENT '时间',
+  `activitytime` datetime NULL DEFAULT NULL COMMENT '活动时间(datetime)',
+  `year` year(4) NULL DEFAULT NULL COMMENT '年',
+  `times` time NULL DEFAULT NULL COMMENT '时间',
   `refreshtime` int(10) NULL DEFAULT NULL COMMENT '刷新时间(int)',
   `createtime` int(10) NULL DEFAULT NULL COMMENT '创建时间',
   `updatetime` int(10) NULL DEFAULT NULL COMMENT '更新时间',
@@ -426,7 +636,7 @@ CREATE TABLE `rail_test`  (
   `status` enum('normal','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal' COMMENT '状态',
   `state` enum('0','1','2') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1' COMMENT '状态值:0=禁用,1=正常,2=推荐',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '测试表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '测试表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_test
@@ -439,7 +649,7 @@ INSERT INTO `rail_test` VALUES (1, 0, 12, '12,13', 'monday', 'hot,index', 'male'
 DROP TABLE IF EXISTS `rail_user`;
 CREATE TABLE `rail_user`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
-  `group_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '组别ID',
+  `department_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '组别ID',
   `username` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '用户名',
   `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '昵称',
   `password` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '密码',
@@ -470,12 +680,25 @@ CREATE TABLE `rail_user`  (
   INDEX `username`(`username`) USING BTREE,
   INDEX `email`(`email`) USING BTREE,
   INDEX `mobile`(`mobile`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '会员表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-会员表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_user
 -- ----------------------------
-INSERT INTO `rail_user` VALUES (1, 1, 'admin', 'admin', '040606f5f5b14c10c447595b26176b13', '990a14', 'admin@163.com', '13888888888', '', 0, 0, '2017-04-15', '', 0.00, 0, 1, 1, 1516170492, 1516171614, '127.0.0.1', 0, '127.0.0.1', 1491461418, 0, 1516171614, '', 'normal', '');
+INSERT INTO `rail_user` VALUES (1, 1, 'admin', 'admin', 'b2dac710bde7b81d4fa2c857923983b9', 'tjMmZY', 'admin@163.com', '13888888888', '', 0, 0, '2017-04-15', '', 0.00, 0, 1, 1, 1516171614, 1607400323, '172.16.13.150', 0, '127.0.0.1', 1491461418, 0, 1607400323, '', 'normal', '');
+
+-- ----------------------------
+-- Table structure for rail_user_department
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_user_department`;
+CREATE TABLE `rail_user_department`  (
+  `id` int(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '部门ID',
+  `pid` int(5) UNSIGNED ZEROFILL NULL DEFAULT NULL COMMENT '父级ID',
+  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '部门名称',
+  `createtime` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updatetime` datetime NULL DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = MyISAM AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '轨道交通-部门表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for rail_user_group
@@ -484,12 +707,12 @@ DROP TABLE IF EXISTS `rail_user_group`;
 CREATE TABLE `rail_user_group`  (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '组名',
-  `rules` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '权限节点',
+  `department_rules` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '权限节点',
   `createtime` int(10) NULL DEFAULT NULL COMMENT '添加时间',
   `updatetime` int(10) NULL DEFAULT NULL COMMENT '更新时间',
   `status` enum('normal','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '状态',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '会员组表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-会员组表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_user_group
@@ -509,7 +732,7 @@ CREATE TABLE `rail_user_money_log`  (
   `memo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
   `createtime` int(10) NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '会员余额变动表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-会员余额变动表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for rail_user_rule
@@ -527,7 +750,7 @@ CREATE TABLE `rail_user_rule`  (
   `weigh` int(10) NULL DEFAULT 0 COMMENT '权重',
   `status` enum('normal','hidden') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '状态',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '会员规则表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-会员规则表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of rail_user_rule
@@ -558,7 +781,35 @@ CREATE TABLE `rail_user_score_log`  (
   `memo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '备注',
   `createtime` int(10) NULL DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '会员积分变动表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-会员积分变动表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of rail_user_score_log
+-- ----------------------------
+INSERT INTO `rail_user_score_log` VALUES (1, 1, 0, 0, 0, '管理员变更积分', 1607400304);
+INSERT INTO `rail_user_score_log` VALUES (2, 1, 0, 0, 0, '管理员变更积分', 1607400310);
+
+-- ----------------------------
+-- Table structure for rail_user_third
+-- ----------------------------
+DROP TABLE IF EXISTS `rail_user_third`;
+CREATE TABLE `rail_user_third`  (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '会员ID',
+  `platform` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '第三方应用',
+  `openid` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '第三方唯一ID',
+  `openname` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT '第三方会员昵称',
+  `access_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'AccessToken',
+  `refresh_token` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT 'RefreshToken',
+  `expires_in` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT '有效期',
+  `createtime` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '创建时间',
+  `updatetime` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '更新时间',
+  `logintime` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '登录时间',
+  `expiretime` int(10) UNSIGNED NULL DEFAULT NULL COMMENT '过期时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `platform`(`platform`, `openid`) USING BTREE,
+  INDEX `user_id`(`user_id`, `platform`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '轨道交通-企微登录记录表' ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for rail_user_token
@@ -570,7 +821,12 @@ CREATE TABLE `rail_user_token`  (
   `createtime` int(10) NULL DEFAULT NULL COMMENT '创建时间',
   `expiretime` int(10) NULL DEFAULT NULL COMMENT '过期时间',
   PRIMARY KEY (`token`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '会员Token表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '轨道交通-会员Token表' ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of rail_user_token
+-- ----------------------------
+INSERT INTO `rail_user_token` VALUES ('9c74961d1630afbce6d35d58d734d439278a9397', 1, 1607400323, 1609992323);
 
 -- ----------------------------
 -- Table structure for rail_version
@@ -589,6 +845,6 @@ CREATE TABLE `rail_version`  (
   `weigh` int(10) NOT NULL DEFAULT 0 COMMENT '权重',
   `status` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT '' COMMENT '状态',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '版本表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '版本表' ROW_FORMAT = Compact;
 
 SET FOREIGN_KEY_CHECKS = 1;
